@@ -1,8 +1,8 @@
-use crate::{dot, Point3, Ray, Vec3};
+use crate::{dot, Interval, Point3, Ray, Vec3};
 
 #[derive(Default, Clone, Copy)]
 pub struct HitRecord {
-    pub point: Point3,
+    pub p: Point3,
     pub normal: Vec3,
     pub t: f64,
     pub front_face: bool,
@@ -20,5 +20,5 @@ impl HitRecord {
 }
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, ray_tmin: f64, ray_tmax: f64, record: &mut HitRecord) -> bool;
+    fn hit(&self, ray: &Ray, ray_t: Interval, record: &mut HitRecord) -> bool;
 }

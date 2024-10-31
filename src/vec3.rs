@@ -3,6 +3,8 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub},
 };
 
+use crate::{random_f64, random_f64_range};
+
 pub type Point3 = Vec3;
 
 #[derive(Default, Debug, Copy, Clone)]
@@ -37,6 +39,20 @@ impl Vec3 {
         let e = self.e;
         e[0] * e[0] + e[1] * e[1] + e[2] * e[2]
     }
+
+    #[inline]
+    pub fn random() -> Self {
+        Vec3::new(random_f64(), random_f64(), random_f64())
+    }
+
+    #[inline]
+    pub fn random_with_range(min: f64, max: f64) -> Self {
+        Vec3::new(
+            random_f64_range(min, max),
+            random_f64_range(min, max),
+            random_f64_range(min, max),
+        )
+    }
 }
 
 #[inline]
@@ -55,6 +71,26 @@ pub fn cross(lhs: Vec3, rhs: Vec3) -> Vec3 {
 #[inline]
 pub fn unit_vector(v: Vec3) -> Vec3 {
     v / v.length()
+}
+
+#[inline]
+pub fn random_unit_vector() -> Vec3 {
+    loop {
+        let p = Vec3::random_with_range(-1., 1.);
+        let lensq = p.length_squared();
+        if (1e-160..=1.).contains(&lensq) {
+            return p / lensq.sqrt();
+        }
+    }
+}
+#[inline]
+pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
+    let on_unit_sphere = random_unit_vector();
+    if dot(on_unit_sphere, *normal) > 0.0 {
+        on_unit_sphere
+    } else {
+        -on_unit_sphere
+    }
 }
 
 impl MulAssign<f64> for Vec3 {

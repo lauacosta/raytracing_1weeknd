@@ -1,16 +1,20 @@
 mod args;
+mod camera;
 mod color;
 mod hittable;
 mod hittable_list;
+mod interval;
 mod ray;
 mod rtweekend;
 mod sphere;
 mod vec3;
 
 pub use args::*;
+pub use camera::*;
 pub use color::*;
 pub use hittable::*;
 pub use hittable_list::*;
+pub use interval::*;
 pub use ray::*;
 pub use rtweekend::*;
 pub use sphere::*;

@@ -6,6 +6,11 @@ edition = "2021"
 [lib]
 path = "./src/lib.rs"
 
+[profile.profiling]
+debug = true
+inherits = "release"
+
 [dependencies]
 clap = { version = "4.5.20", features = ["derive"] }
 indicatif = "0.17.8"
+rand = "0.8.5"
