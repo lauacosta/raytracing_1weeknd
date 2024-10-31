@@ -11,5 +11,5 @@ pub fn write_color(pixel_color: Color) {
     let gbyte = (255.999 * g) as u64;
     let bbyte = (255.999 * b) as u64;
 
-    println!("{rbyte}  {gbyte}  {bbyte}",)
+    println!("{rbyte}  {gbyte}  {bbyte}");
 }

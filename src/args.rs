@@ -10,5 +10,5 @@ pub struct Args {
     pub ratio_height: f64,
 
     #[arg(long = "image-width", default_value_t = 400)]
-    pub image_width: u64,
+    pub image_width: u32,
 }

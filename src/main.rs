@@ -1,33 +1,21 @@
+use std::sync::Arc;
+
 use clap::Parser;
-use raytracing::{dot, unit_vector, write_color, Args, Color, Point3, Ray, Vec3};
+use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
+use raytracing::{
+    unit_vector, write_color, Args, Color, HitRecord, Hittable, HittableList, Point3, Ray, Sphere,
+    Vec3, INFINITY,
+};
 
-fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
-    let oc = *center - *ray.origin();
-    let a = ray.direction().length_squared();
-    let h = dot(*ray.direction(), oc);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = h * h - a * c;
+fn ray_color(ray: &Ray, world: &impl Hittable) -> Color {
+    let mut record = HitRecord::default();
 
-    if discriminant < 0.0 {
-        return -1.0;
-    } else {
-        return (h - discriminant.sqrt()) / a;
-    }
-}
-
-fn ray_color(ray: Ray) -> Color {
-    let t = hit_sphere(&Point3::new(0., 0., -1.), 0.5, &ray);
-
-    if t > 0.0 {
-        let n = unit_vector(ray.at(t) - Vec3::new(0., 0., -1.));
-        let result = 0.5 * Color::new(n.x() + 1., n.y() + 1., n.z() + 1.);
-        return result;
+    if world.hit(&ray, 0.0, INFINITY, &mut record) {
+        return 0.5 * (record.normal + Color::new(1.0, 1.0, 1.0));
     }
 
     let unit_direction = unit_vector(*ray.direction());
-
     let a = 0.5 * (unit_direction.y() + 1.0);
-
     (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
 }
 
@@ -38,13 +26,18 @@ fn main() {
     let image_width = args.image_width;
 
     let image_height = {
-        let image_height = (image_width as f64 / aspect_ratio) as u64;
+        let image_height = (image_width as f64 / aspect_ratio) as u32;
         if image_height < 1 {
             1
         } else {
             image_height
         }
     };
+
+    let mut world = HittableList::default();
+
+    world.add(Sphere::new(&Point3::new(0., 0., -1.), 0.5));
+    world.add(Sphere::new(&Point3::new(0., -100.5, -1.), 100.0));
 
     dbg!(
         "aspect ratio {} - image width {} - image height {}",
@@ -69,10 +62,11 @@ fn main() {
 
     let pixel00_loc = viewport_upper_left + 0.5 * (pixer_delta_u + pixer_delta_v);
 
-    print!("P3\n {}  {}\n255\n", image_width, image_height);
+    print!("P3\n {image_width}  {image_height}\n255\n");
 
-    for j in 0..image_height {
-        eprintln!("\rScanlines remaining: {}  ", image_height - j);
+    let style = ProgressStyle::default_bar();
+    for j in (0..image_height).progress_with_style(style) {
+        // bar.inc(1);
         for i in 0..image_width {
             let pixel_center =
                 pixel00_loc + (i as f64 * pixer_delta_u) + (j as f64 * pixer_delta_v);
@@ -80,9 +74,9 @@ fn main() {
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction);
 
-            let pixel_color = ray_color(ray);
+            let pixel_color = ray_color(&ray, &world);
             write_color(pixel_color);
         }
     }
-    eprintln!("Done");
+    // bar.finish();
 }
