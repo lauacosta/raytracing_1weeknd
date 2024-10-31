@@ -53,6 +53,12 @@ impl Vec3 {
             random_f64_range(min, max),
         )
     }
+
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+
+        self.e.iter().all(|&component| component.abs() < s)
+    }
 }
 
 #[inline]
@@ -83,6 +89,7 @@ pub fn random_unit_vector() -> Vec3 {
         }
     }
 }
+
 #[inline]
 pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
     let on_unit_sphere = random_unit_vector();
@@ -91,6 +98,11 @@ pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
     } else {
         -on_unit_sphere
     }
+}
+
+#[inline]
+pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
+    v - 2. * dot(v, n) * n
 }
 
 impl MulAssign<f64> for Vec3 {

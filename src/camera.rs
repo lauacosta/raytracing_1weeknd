@@ -44,8 +44,8 @@ impl Camera {
                 let mut pixel_color = Color::new(0., 0., 0.);
 
                 for _ in 0..self.samples_per_pixel {
-                    let ray = self.get_ray(i, j);
-                    pixel_color += self.ray_color(&ray, self.max_depth, &world);
+                    let mut ray = self.get_ray(i, j);
+                    pixel_color += self.ray_color(&mut ray, self.max_depth, &world);
                 }
 
                 write_color(pixel_color * self.pixel_samples_scale);
@@ -89,7 +89,7 @@ impl Camera {
         );
     }
 
-    fn ray_color(&self, ray: &Ray, max_depth: u32, world: &impl Hittable) -> Color {
+    fn ray_color(&self, ray: &mut Ray, max_depth: u32, world: &impl Hittable) -> Color {
         if max_depth == 0 {
             return Color::new(0., 0., 0.);
         }
@@ -97,9 +97,19 @@ impl Camera {
         let mut record = HitRecord::default();
 
         if world.hit(ray, Interval::new(0.001, INFINITY), &mut record) {
+            let mut scattered = Ray::default();
+            let mut attenuation = Color::default();
+
+            if record
+                .mat
+                .scatter(ray, &record, &mut attenuation, &mut scattered)
+            {
+                return attenuation * self.ray_color(&mut scattered, max_depth - 1, world);
+            }
+
+            return Color::new(0., 0., 0.);
             // let direction = random_on_hemisphere(&record.normal);
-            let direction = record.normal + random_unit_vector();
-            return 0.5 * self.ray_color(&Ray::new(record.p, direction), max_depth - 1, world);
+            // return 0.5 * self.ray_color(&Ray::new(record.p, direction), max_depth - 1, world);
         }
 
         let unit_direction = unit_vector(*ray.direction());

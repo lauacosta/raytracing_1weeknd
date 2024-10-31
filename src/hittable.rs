@@ -1,11 +1,25 @@
-use crate::{dot, Interval, Point3, Ray, Vec3};
+use std::{default, sync::Arc};
 
-#[derive(Default, Clone, Copy)]
+use crate::{dot, Interval, Material, Placeholder, Point3, Ray, Vec3};
+
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
+    pub mat: Arc<dyn Material>,
     pub t: f64,
     pub front_face: bool,
+}
+
+impl Default for HitRecord {
+    fn default() -> Self {
+        Self {
+            p: Point3::default(),
+            normal: Vec3::default(),
+            mat: Arc::new(Placeholder::default()),
+            t: f64::default(),
+            front_face: bool::default(),
+        }
+    }
 }
 
 impl HitRecord {

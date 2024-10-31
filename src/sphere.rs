@@ -1,16 +1,20 @@
-use crate::{dot, Hittable, Interval, Point3};
+use std::sync::Arc;
+
+use crate::{dot, Hittable, Interval, Material, Point3};
 
 pub struct Sphere {
     center: Point3,
     radius: f64,
+    mat: Arc<dyn Material>,
 }
 
 impl Sphere {
     #[must_use]
-    pub fn new(center: &Point3, radius: f64) -> Self {
+    pub fn new(center: &Point3, radius: f64, mat: Arc<impl Material + 'static>) -> Self {
         Self {
             center: *center,
             radius: radius.max(0.0),
+            mat,
         }
     }
 }
@@ -43,6 +47,7 @@ impl Hittable for Sphere {
         record.p = ray.at(record.t);
         let outward_normal = (record.p - self.center) / self.radius;
         record.set_face_normal(ray, &outward_normal);
+        record.mat = self.mat.clone();
 
         true
     }
