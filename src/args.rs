@@ -1,5 +1,7 @@
 use clap::{command, Parser};
 
+use crate::{Point3, Vec3};
+
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 pub struct Args {
@@ -17,4 +19,16 @@ pub struct Args {
 
     #[arg(long = "max-depth", default_value_t = 50)]
     pub max_depth: u32,
+
+    #[arg(long = "field-of-view", default_value_t = 90)]
+    pub vfov: u32,
+
+    #[arg(long = "look-from", default_value = "-2,2,1")]
+    pub lookfrom: Point3,
+
+    #[arg(long = "look-at", default_value = "0,0,-1")]
+    pub lookat: Point3,
+
+    #[arg(long = "v-up", default_value = "0,1,0")]
+    pub vup: Vec3,
 }

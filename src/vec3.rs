@@ -1,6 +1,7 @@
 use std::{
     fmt::Display,
     ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub},
+    str::FromStr,
 };
 
 use crate::{random_f64, random_f64_range};
@@ -103,6 +104,15 @@ pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
 #[inline]
 pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
     v - 2. * dot(v, n) * n
+}
+
+pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f64) -> Vec3 {
+    let cos_theta = f64::min(dot(-uv, n), 1.0);
+    let r_out_perp = etai_over_etat * (uv + cos_theta * n);
+
+    let r_out_parallel = f64::abs(1.0 - r_out_perp.length_squared()).sqrt() * n;
+
+    r_out_perp + r_out_parallel
 }
 
 impl MulAssign<f64> for Vec3 {
@@ -223,5 +233,22 @@ impl Div<f64> for Vec3 {
     #[inline]
     fn div(self, rhs: f64) -> Self::Output {
         (1.0 / rhs) * self
+    }
+}
+
+impl FromStr for Vec3 {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let coords: Vec<&str> = s.split(',').collect();
+        if coords.len() != 3 {
+            return Err("Un vector tiene que estar en el formato 'x,y,z'".to_string());
+        }
+
+        let x = coords[0].parse::<f64>().map_err(|e| e.to_string())?;
+        let y = coords[1].parse::<f64>().map_err(|e| e.to_string())?;
+        let z = coords[2].parse::<f64>().map_err(|e| e.to_string())?;
+
+        Ok(Vec3::new(x, y, z))
     }
 }
