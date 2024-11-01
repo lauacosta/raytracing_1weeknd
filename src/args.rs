@@ -31,4 +31,10 @@ pub struct Args {
 
     #[arg(long = "v-up", default_value = "0,1,0")]
     pub vup: Vec3,
+
+    #[arg(long = "defocus-angle", default_value_t = 0.)]
+    pub defocus_angle: f64,
+
+    #[arg(long = "focus-dist", default_value_t = 10.)]
+    pub focus_dist: f64,
 }
